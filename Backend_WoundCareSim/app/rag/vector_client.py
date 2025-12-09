@@ -2,25 +2,24 @@ from typing import List, Dict
 
 class VectorClient:
     """
-    Placeholder vector store client for Week 2.
-    Real OpenAI Vector Store integration will be added in Week 4.
+    Week-2 dummy vector client.
+    This will be replaced with a real vector store client (e.g., Pinecone, ChromaDB).
     """
-
-    def __init__(self, vector_store_id: str):
-        self.vector_store_id = vector_store_id
-
-    async def query(self, query_text: str, scenario_id: str, step: str, top_k: int = 5) -> List[Dict]:
+    async def query(self, query_text: str, scenario_id: str, step: str) -> List[Dict]:
         """
-        Returns dummy chunks now.
-        Week 4 will replace with real vector store search.
+        Returns static fake chunks for testing.
+        No external API calls. No embeddings.
         """
+        # Minimal fake content chunk representing RAG output
         return [
             {
-                "chunk": f"Mock RAG chunk for '{query_text}' (scenario: {scenario_id}, step: {step})",
-                "score": 0.9,
+                "content": f"Dummy RAG context for query='{query_text}', scenario='{scenario_id}', step='{step}'.",
                 "metadata": {
                     "scenario_id": scenario_id,
                     "step": step,
+                    "source": "week2_stub"
                 }
             }
         ]
+
+query_vectorstore = VectorClient().query # for backward compatibility if needed

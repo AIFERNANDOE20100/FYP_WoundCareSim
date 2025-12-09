@@ -1,4 +1,3 @@
-# app/agents/clinical_agent.py
 from typing import Dict, Any, List
 from app.agents.agent_base import AgentBase
 from app.utils.schema import EvaluatorOutput

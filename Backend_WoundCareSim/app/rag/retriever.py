@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from app.rag.vector_client import VectorClient
 
 class Retriever:
@@ -9,7 +9,7 @@ class Retriever:
     def __init__(self, vector_client: VectorClient):
         self.vector_client = vector_client
 
-    async def get_context(self, query: str, scenario_id: str, step: str) -> List[dict]:
+    async def get_context(self, query: str, scenario_id: str, step: str) -> List[Dict]:
         """
         Week 2: returns mocked vector data.
         Week 4: will integrate real OpenAI retrieval.

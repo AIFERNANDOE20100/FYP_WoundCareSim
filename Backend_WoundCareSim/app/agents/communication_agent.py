@@ -1,4 +1,3 @@
-# app/agents/communication_agent.py
 from typing import Dict, Any
 from app.agents.agent_base import AgentBase
 from app.utils.schema import EvaluatorOutput
