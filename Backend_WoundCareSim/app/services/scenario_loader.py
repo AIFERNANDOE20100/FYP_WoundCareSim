@@ -1,5 +1,3 @@
-# app/services/scenario_loader.py
-
 from typing import Dict
 from app.services.scenario_service import get_scenario
 from app.utils.validators import validate_scenario_payload

@@ -6,10 +6,7 @@ from dotenv import load_dotenv
 # Load .env variables
 load_dotenv()
 
-
-# Environment variable name (KEEP SAME STYLE AS BEFORE)
-FIREBASE_SA = os.getenv("FIREBASE_SERVICE_ACCOUNT")
-
+FIREBASE_SA = "../../../fyp-woundcaresim-firebase-adminsdk-fbsvc-ec03499240.json"
 
 if not FIREBASE_SA:
     raise RuntimeError(

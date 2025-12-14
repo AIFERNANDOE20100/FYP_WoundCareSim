@@ -1,5 +1,3 @@
-# app/services/scenario_service.py
-
 from typing import Dict, List
 from datetime import datetime
 from app.utils.firebase_client import (

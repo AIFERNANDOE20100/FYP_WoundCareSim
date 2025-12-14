@@ -5,7 +5,7 @@ from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
 load_dotenv()
 
-FIREBASE_SA = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+FIREBASE_SA = "../../fyp-woundcaresim-firebase-adminsdk-fbsvc-ec03499240.json"
 if not FIREBASE_SA:
     raise RuntimeError("FIREBASE_SERVICE_ACCOUNT env var not set (path to service account JSON)")
 
