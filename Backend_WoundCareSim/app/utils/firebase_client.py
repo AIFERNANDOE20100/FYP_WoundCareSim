@@ -2,11 +2,14 @@ import os
 import firebase_admin
 from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Load .env variables
 load_dotenv()
 
-FIREBASE_SA = "../../../fyp-woundcaresim-firebase-adminsdk-fbsvc-ec03499240.json"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+
+FIREBASE_SA = BASE_DIR/ "fyp-woundcaresim-firebase-adminsdk-fbsvc-ec03499240.json"
 
 if not FIREBASE_SA:
     raise RuntimeError(

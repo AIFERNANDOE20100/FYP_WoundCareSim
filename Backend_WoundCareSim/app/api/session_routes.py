@@ -6,7 +6,7 @@ from app.services.session_manager import SessionManager
 from app.services.scenario_loader import load_scenario
 from app.core.state_machine import Step, next_step
 from app.core.coordinator import coordinate
-from app.rag.retriever import retrieve_context
+from app.rag.retriever import retrieve_with_rag
 
 router = APIRouter(prefix="/session", tags=["Session"])
 
@@ -51,59 +51,77 @@ def start_session(req: StartSessionRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/step")
-def session_step(payload: EvalInput):
-    session = session_manager.get_session(payload.session_id)
+@router.post("/session/step")
+async def session_step(payload: EvalInput):
+    sid = payload.session_id
+    session = session_manager.get_session(sid)
+
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
     cur_step = session["current_step"]
     scenario_id = session["scenario_id"]
 
-    rag_context = []
+    rag_result = None
 
     if payload.user_input:
-        rag_context = retrieve_context(
-            query=payload.user_input,
-            scenario_id=scenario_id,
-            top_k=5
-        )
+        try:
+            rag_result = await retrieve_with_rag(
+                query=payload.user_input,
+                scenario_id=scenario_id,
+                system_instruction=(
+                    f"You are assisting in step '{cur_step}' "
+                    "of a surgically clean wound care procedure."
+                )
+            )
 
-        session_manager.add_rag_result(
-            payload.session_id,
-            {
-                "step": cur_step,
-                "query": payload.user_input,
-                "results": rag_context
-            }
-        )
+            # Store RAG result for debugging / traceability
+            session_manager.add_rag_result(
+                sid,
+                {
+                    "step": cur_step,
+                    "query": payload.user_input,
+                    "llm_output": rag_result["text"]
+                }
+            )
 
-    # Aggregate evaluator outputs (Week-3 stub logic)
-    evaluation = coordinate(payload.evaluator_outputs)
+        except Exception as e:
+            print(f"RAG retrieval failed: {str(e)}")
 
+    # Coordinator aggregation (still evaluator-output driven)
+    try:
+        agg = coordinate(payload.evaluator_outputs)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Evaluation failed: {str(e)}")
+
+    # Log session
     session_manager.add_log(
-        payload.session_id,
+        sid,
         {
             "step": cur_step,
             "user_input": payload.user_input,
-            "evaluation": evaluation
+            "evaluation": agg,
+            "rag_used": rag_result is not None
         }
     )
 
-    response = {
-        "session_id": payload.session_id,
-        "current_step": cur_step,
-        "evaluation": evaluation
-    }
-
+    # Step transition
     try:
         next_s = next_step(Step(cur_step))
         session["current_step"] = next_s.value
-        response["next_step"] = next_s.value
     except Exception:
-        pass
+        next_s = None
 
-    if rag_context:
-        response["rag_context"] = rag_context
+    response = {
+        "session_id": sid,
+        "current_step": cur_step,
+        "evaluation": agg,
+    }
+
+    if rag_result:
+        response["assistant_response"] = rag_result["text"]
+
+    if next_s:
+        response["next_step"] = next_s.value
 
     return response
