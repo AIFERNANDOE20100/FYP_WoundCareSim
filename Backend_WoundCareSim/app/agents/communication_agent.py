@@ -1,5 +1,7 @@
 import json
 import re
+
+from pydantic import ValidationError
 from app.agents.agent_base import BaseAgent
 from app.utils.schema import EvaluatorResponse
 
@@ -69,14 +71,15 @@ class CommunicationAgent(BaseAgent):
             
             return structured_output
 
-        except (json.JSONDecodeError, ValueError) as e:
-            print(f"JSON Parsing failed: {e}. Raw: {raw_response}")
+        # UPDATED EXCEPT BLOCK: Catch ValidationError
+        except (json.JSONDecodeError, ValueError, ValidationError) as e:
+            print(f"Agent Parsing Failed: {e}")
             return EvaluatorResponse(
                 agent_name="CommunicationAgent",
                 step=current_step,
                 strengths=[],
                 issues_detected=["Error parsing evaluator response"],
-                explanation=f"Raw Output could not be parsed: {raw_response}",
+                explanation=f"Failed to parse LLM output. Raw: {raw_response[:50]}...",
                 verdict="Inappropriate",
                 confidence=0.0
             )
